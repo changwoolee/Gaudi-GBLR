@@ -1,0 +1,54 @@
+# @package _global_
+# This config replicates # https://github.com/facebookresearch/ConvNeXt/blob/main/TRAINING.md
+
+defaults:
+  - /experiment/imagenet/resnet/resnet18
+
+
+  # all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+
+model:
+  pretrained: false
+  unified_mask: false
+  per_kernel: false
+  gaudi_params:
+    width_init: splr
+    no_gaussian: false
+    momentum: 0.0
+
+trainer:
+  max_epochs: 90
+  precision: 32
+
+datamodule:
+  batch_size: 512 # Per GPU
+
+train:
+  global_batch_size: 2048
+  num_steps_per_epoch: ${div_up:${datamodule.__train_len}, ${train.global_batch_size}}
+  optimizer:
+    _target_: torch.optim.SGD
+    lr: 0.2 #${eval:0.1 * ${div_up:${train.global_batch_size}, 256}}
+    weight_decay: 0.0001
+    momentum: 0.9
+  scheduler:
+    _target_: src.optim.timm_lr_scheduler.TimmStepLRScheduler
+    decay_t: 30
+    decay_rate: 0.1
+    warmup_lr_init: 1e-3
+    warmup_t: 0 
+    t_in_epochs: true
+  scheduler_interval: epoch
+  loss_fn:
+    _target_: torch.nn.CrossEntropyLoss
+    label_smoothing: 0.0
+  loss_fn_val:
+    _target_: torch.nn.CrossEntropyLoss
+
+callbacks:
+  shrink:
+    _target_: src.callbacks.shrink.TargetedSoftshrink
+    thres: 0.001
+    target_width: 0.35

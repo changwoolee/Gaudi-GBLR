@@ -1,0 +1,18 @@
+# @package _global_
+defaults:
+  - /experiment/wt103/gpt2-ft-gaudi.yaml
+
+
+model:
+  model_name: "Graphcore/gpt2-medium-wikitext-103"
+
+datamodule:
+  batch_size: 8  # Per GPU
+
+train:
+  global_batch_size: 512
+
+
+callbacks:
+  flop_count:
+    _target_: src.callbacks.flop_count.NumParamsGPT2MediumGaudi

@@ -1,0 +1,7 @@
+sigma_annealing:
+  _target_: src.callbacks.fm_sigma_annealing.SigmaAnnealing
+  sigma_init: null
+  sigma_final: null
+  start_epoch: null
+  end_epoch: null
+

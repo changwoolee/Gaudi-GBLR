@@ -1,0 +1,26 @@
+# @package _global_
+
+# to execute this experiment run:
+# python run.py experiment=example_simple.yaml
+
+defaults:
+  - /experiment/cifar10/mixer/mixers.yaml
+
+model:
+  drop_path_rate: 0.1
+  drop_rate: 0.0
+  channel_mlp_cfg:
+    _target_: src.models.layers.mlp.MlpCustom
+    linear1_cfg:
+      _target_: src.models.layers.fastlinear.LowRank
+      rank: 0.25
+    linear2_cfg: ${.linear1_cfg}
+  token_mlp_cfg: ${.channel_mlp_cfg}
+
+datamodule:
+  batch_size: 512
+
+train:
+  optimizer:
+    lr: 5e-4
+

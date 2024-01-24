@@ -1,0 +1,18 @@
+# @package _global_
+defaults:
+  - /experiment/cifar10/vit/vit-s.yaml
+  - override /model/vitmlp_cfg: fbbflylr
+
+
+model:
+  attnlinear_cfg: ${model.mlp_cfg.linear1_cfg}
+  drop_path_rate: 0.1
+  mlp_cfg:
+    linear1_cfg:
+      rank: 32
+      sparse_cfg: 
+        backend: "dense"
+        sparsity_config:
+          butterfly_size: 16
+          n_factors: 2
+          block: 32

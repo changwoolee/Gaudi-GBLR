@@ -1,0 +1,9 @@
+#@package _global_
+
+defaults:
+  - /experiment/glue/glue-cola-gaudi.yaml
+  - override /datamodule: glue-rte
+
+task:
+  task_name: rte
+

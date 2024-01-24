@@ -1,0 +1,65 @@
+# @package _global_
+defaults:
+  - /experiment/wt103/gpt2.yaml
+
+task:
+  _target_: src.tasks.seq.GPT2Wiki103
+
+model:
+  model_name: "Graphcore/gpt2-wikitext-103"
+  layer_type: "gaudi"
+  project_only: true
+  decompose: true
+  structure_lr_base: 80.0
+  nblocks: 4
+  rank_ratio: 0.25
+  gaudi_params:
+    rank_per_component: 1
+    total_rank_ratio: 1
+    fixed_width: false
+    fixed_location: false
+    min_widths: [0.0, 0.0]
+    max_widths: [1.0, 1.0]
+    width_init: 'lr0.25'
+    compute_mode: "dense"
+    location_init: 'linspace'
+    width_learning_rate: ${train.optimizer.lr}
+    width_weight_decay: 0.0
+    location_learning_rate: ${.width_learning_rate}
+    adam_betas: [0.0, 0.999]
+    kernel: "dirichlet"
+    custom_grad: true
+    no_gaussian: true
+
+datamodule:
+  batch_size: 16  # Per GPU
+
+train:
+  global_batch_size: 512
+  optimizer:
+    lr: 1.5e-3
+  scheduler:
+    num_warmup_steps: ${eval:${div_up:${datamodule.__train_len}, ${train.global_batch_size}} * 1}
+
+trainer:
+  max_epochs: 10
+
+
+callbacks:
+  shrink:
+    #_target_: src.callbacks.shrink.TargetedSoftshrink
+    _target_: src.callbacks.shrink.MeanShrink
+    thres: 1.0
+    target_width: 0.25
+    rate: ${div_up:${train.global_batch_size}, ${datamodule.batch_size}}
+  sigma_annealing:
+    _target_: src.callbacks.fm_sigma_annealing.SigmaAnnealing
+    sigma_init: 1.0
+    sigma_final: 100.0
+    start_epoch: 1
+    end_epoch: ${trainer.max_epochs}
+  width_monitor:
+    _target_: src.callbacks.width_monitor.WidthMonitor
+  flop_count:
+    _target_: src.callbacks.flop_count.NumParamsGPT2Gaudi
+

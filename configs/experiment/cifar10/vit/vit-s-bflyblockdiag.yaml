@@ -1,0 +1,13 @@
+# @package _global_
+
+# to execute this experiment run:
+# python run.py experiment=example_simple.yaml
+
+defaults:
+  - /experiment/cifar10/vit/vit-s.yaml
+  - override /model/vitmlp_cfg: butterflyblockdiag
+
+model:
+  drop_path_rate: 0.1
+  drop_rate: 0.0
+  attnlinear_cfg: ${model.mlp_cfg.linear1_cfg}

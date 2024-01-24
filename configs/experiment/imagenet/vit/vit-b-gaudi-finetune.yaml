@@ -1,0 +1,47 @@
+# @package _global_
+defaults:
+  - /experiment/imagenet/vit/vit-b-gaudi.yaml
+
+
+callbacks:
+  init_from_pretrained:
+    _target_: src.callbacks.init_from_pretrained.InitFromPretrained
+    ckpt: ./saved_models/imagenet-vit-b/last.ckpt
+    budget: 0.2
+    weight_lr: 0.005
+    structure_lr_base: 20.0
+    thres_row_list: [0.98]
+    thres_col_list: ${.thres_row_list}
+    niter: 1000
+    one_by_one: false
+    opnorm_target: null 
+    verbose: false
+    skip_loading: false
+    use_sigma: false
+
+  shrink:
+    _target_: src.callbacks.shrink.TargetedSoftshrink
+    target_width: 0.0
+    thres: 0.0
+    target: 1.0
+    lambd: 0.0
+
+
+train:
+  optimizer:
+    lr: 1e-4
+  scheduler:
+    t_initial: 35
+    warmup_t: 0
+  cooldown_epochs: 0
+
+
+model:
+  drop_path_rate: 0.1
+  mlp_cfg:
+    linear1_cfg:
+      rank_per_component: 1
+      width_learning_rate: 0.0001
+      scaled_gaussian: false
+      no_gaussian: true
+      compute_mode: dense

@@ -1,0 +1,21 @@
+# @package _global_
+defaults:
+  - /experiment/imagenet/vit/vit-b-fbbflylr-mlpattnlinear.yaml
+
+callbacks:
+  init_from_pretrained:
+    _target_: src.callbacks.init_from_pretrained.InitFromPretrained
+    ckpt: ./saved_models/imagenet-vit-b/last.ckpt
+    budget: 0.0
+    weight_lr: 0.001
+    niter: 1000
+
+
+train:
+  optimizer:
+    lr: 1e-4
+  scheduler:
+    t_initial: 50
+    warmup_t: 0
+  cooldown_epochs: 0
+

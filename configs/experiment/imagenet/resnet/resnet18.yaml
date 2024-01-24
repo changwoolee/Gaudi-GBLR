@@ -1,0 +1,129 @@
+# @package _global_
+# This config replicates # https://github.com/facebookresearch/ConvNeXt/blob/main/TRAINING.md
+
+defaults:
+  - override /trainer: default # choose trainer from 'configs/trainer/'
+  - override /model: null
+  - override /datamodule: imagenet
+  - override /optimizer: adamw
+  - override /scheduler: null
+  - override /callbacks: default
+  - override /metrics: [acc, acctop5]
+  - override /logger: wandb
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+seed: 1111
+
+task:
+  _target_: src.tasks.seq.ConvNetImageNet
+
+eval:
+  metrics:
+    acc:
+      num_classes: ${datamodule.__num_classes}
+    acctop5:
+      num_classes: ${datamodule.__num_classes}
+
+
+model:
+  model_name: resnet18
+  pretrained: true
+  layer_type: gaudi
+  decompose: true
+  project_only: true
+  unified_mask: false
+  per_kernel: true
+  init: lr
+  gaudi_params:
+    rank_per_component: 1
+    total_rank_ratio: 1
+    fixed_width: false
+    fixed_location: false
+    min_widths: [0.0, 0.0]
+    max_widths: [1.0, 1.0]
+    width_init: lr0.35
+    compute_mode: dense
+    location_init: linspace
+    width_learning_rate: ${train.optimizer.lr}
+    width_weight_decay: 0.0
+    location_learning_rate: ${.width_learning_rate}
+    adam_betas: [0.0, 0.999]
+    kernel: dirichlet
+    custom_grad: true
+    no_gaussian: true
+
+
+
+trainer:
+  accelerator: gpu
+  devices: 1
+  num_nodes: 1
+  accumulate_grad_batches: ${div_up:${train.global_batch_size}, ${eval:${.devices} * ${datamodule.batch_size} * ${.num_nodes}}}
+  max_epochs: 10
+  precision: 32
+
+datamodule:
+  batch_size: 512 # Per GPU
+  num_workers: 4  # Per GPU
+  image_size: 224
+  dali: 'gpu'
+  train_transforms: null
+  val_transforms:
+    _target_: timm.data.create_transform
+    input_size: ${datamodule.image_size}
+    interpolation: bicubic
+    crop_pct: 0.875
+  test_transforms: ${.val_transforms}
+
+
+train:
+  global_batch_size: 512 
+  num_steps_per_epoch: ${div_up:${datamodule.__train_len}, ${train.global_batch_size}}
+  optimizer:
+    lr: 1e-4
+    weight_decay: 0.05
+  optimizer_param_grouping:
+    bias_weight_decay: False
+    normalization_weight_decay: False
+  scheduler:
+    _target_: src.optim.timm_lr_scheduler.TimmCosineLRScheduler
+    t_initial: ${eval:${trainer.max_epochs} * ${train.num_steps_per_epoch}}
+    lr_min: 1e-6
+    warmup_lr_init: 1e-6
+    warmup_t: 100 #${eval:20 * ${train.num_steps_per_epoch}}
+    cycle_limit: 1
+    t_in_epochs: False
+
+  scheduler_interval: step
+  loss_fn:
+    _target_: torch.nn.CrossEntropyLoss
+    label_smoothing: 0.1
+  loss_fn_val:
+    _target_: torch.nn.CrossEntropyLoss
+
+
+callbacks:
+  ema: null
+  shrink:
+    _target_: src.callbacks.shrink.TargetedSoftshrink
+    thres: 0.005
+    target_width: 0.35
+    rate: ${div_up:${train.global_batch_size}, ${eval:${datamodule.batch_size} * ${trainer.num_nodes} * ${trainer.devices}}}
+  width_monitor:
+    _target_: src.callbacks.width_monitor.WidthMonitor
+  sigma_annealing:
+    _target_: src.callbacks.fm_sigma_annealing.SigmaAnnealing
+    sigma_init: 1.0
+    sigma_final: 100.0
+    start_epoch: 1
+    end_epoch: ${trainer.max_epochs}
+  flop_count:
+    _target_: src.callbacks.flop_count.FlopCount
+    sinc_gaussian: false
+    gaudi_conv: true
+    baseline_complexity: 1.82e9
+    profilers: ['fvcore']
+
+

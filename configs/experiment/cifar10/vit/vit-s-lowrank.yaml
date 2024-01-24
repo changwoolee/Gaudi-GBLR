@@ -1,0 +1,16 @@
+# @package _global_
+defaults:
+  - /experiment/cifar10/vit/vit-s.yaml
+
+
+model:
+  mlp_cfg:
+    _target_: src.models.layers.mlp.MlpCustom
+    linear1_cfg:
+      _target_: src.models.layers.fastlinear.LowRank
+      rank: 0.25
+    linear2_cfg: ${.linear1_cfg}
+  attnlinear_cfg: ${.mlp_cfg.linear1_cfg}
+
+
+

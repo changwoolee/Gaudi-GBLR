@@ -1,0 +1,5 @@
+# @package train.reg_fn
+_target_: src.losses.regularizers.AverageRegularizer
+complexity: 0.3
+lambd: 1
+p: 2

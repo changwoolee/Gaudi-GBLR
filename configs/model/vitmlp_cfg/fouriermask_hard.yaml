@@ -1,0 +1,16 @@
+# @package model
+mlp_cfg:
+  _target_: src.models.layers.mlp.MlpCustom
+  linear1_cfg:
+    _target_: src.models.layers.fouriermask.FourierMaskHard
+    sigma: 10.0
+    min_widths: [0.0, 0.0]
+    max_widths: [1.0, 1.0]
+    width_init: 1.0
+    width_learning_rate: 0.005
+    width_weight_decay: 0.0
+    location_learning_rate: 0.005
+    complexity: 0.3
+    beta: 2.0
+  linear2_cfg: ${.linear1_cfg}
+

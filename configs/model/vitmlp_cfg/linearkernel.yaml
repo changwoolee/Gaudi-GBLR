@@ -1,0 +1,10 @@
+# @package model
+mlp_cfg:
+  _target_: src.models.layers.mlp.MlpCustom
+  linear1_cfg:
+    _target_: src.models.layers.kernelized.Kernelized
+    rank: 0.2
+    kernel_cfg:
+      _target_: src.models.layers.kernelized.LinearKernel
+  linear2_cfg: ${.linear1_cfg}
+

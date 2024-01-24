@@ -1,0 +1,6 @@
+# @package model
+mlp_cfg:
+  _target_: src.models.layers.mlp.TopkMlp
+  drop: 0.0
+  window_size: 2
+  topk_ratio: 0.1

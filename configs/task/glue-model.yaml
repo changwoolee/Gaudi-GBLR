@@ -1,0 +1,3 @@
+_target_: src.tasks.glue.GLUETransformer
+model_name_or_path: "bert-base-uncased"
+task_name: null

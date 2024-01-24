@@ -1,0 +1,70 @@
+# @package _global_
+
+# specify here default training configuration
+defaults:
+  - _self_
+  - trainer: default
+  - optimizer: adamw
+  - scheduler: null
+  - task: sequence-model
+  - model: transformer-classifier
+  - datamodule: lra-imagec
+  - callbacks: default # set this to null if you don't want to use callbacks
+  - metrics: null
+  - logger: null # set logger here or use command line (e.g. `python run.py logger=wandb`)
+
+  - mode: default
+
+  - experiment: null
+  - hparams_search: null
+
+  # enable color logging
+  - override hydra/hydra_logging: colorlog
+  - override hydra/job_logging: colorlog
+
+    # path to root directory
+# this requires PROJECT_ROOT environment variable to exist
+# PROJECT_ROOT is inferred and set by pyrootutils package in `train.py` and `eval.py`
+root_dir: ${oc.env:PROJECT_ROOT}
+
+# path to data directory
+data_dir: ${root_dir}/data/
+
+# path to logging directory
+log_dir: ${root_dir}/logs/
+
+# path to output directory, created dynamically by hydra
+# path generation pattern is specified in `configs/hydra/default.yaml`
+# use it to store all files generated during the run, like ckpts and metrics
+output_dir: ${hydra:runtime.output_dir}
+
+# path to working directory
+work_dir: ${hydra:runtime.cwd}
+
+# output directory, generated dynamically on each run
+hydra:
+  run:
+    dir: ${log_dir}/${task_name}/runs/${now:%Y-%m-%d}_${now:%H-%M-%S}
+  sweep:
+    dir: ${log_dir}/${task_name}/multiruns/${now:%Y-%m-%d}_${now:%H-%M-%S}
+    subdir: ${hydra.job.num}
+
+# pretty print config at the start of the run using Rich library
+print_config: True
+
+# disable python warnings if they annoy you
+ignore_warnings: True
+
+# check performance on test set, using the best model achieved during training
+# lightning chooses best model based on metric specified in checkpoint callback
+test_after_training: True
+
+resume: False
+
+# seed for random number generators in pytorch, numpy and python.random
+seed: null
+
+# name of the run, accessed by loggers
+name: null
+
+

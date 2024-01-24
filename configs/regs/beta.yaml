@@ -1,0 +1,5 @@
+# @package train.reg_fn
+_target_: src.losses.regularizers.BetaRegularizer
+beta1: 1.0
+beta0: 1.0
+lambd: 1.0

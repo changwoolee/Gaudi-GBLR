@@ -1,0 +1,33 @@
+# @package _global_
+defaults:
+  - /experiment/cifar10/vit/t2tvit7.yaml
+  - override /model/t2tmodel: vit_s_4
+  - override /callbacks: default
+
+model:
+  drop_path_rate: 0.1
+  img_size: 32
+
+trainer:
+  precision: 16
+
+datamodule:
+  batch_size: 1024  # Per GPU
+  image_size: 32
+
+train:
+  global_batch_size: 1024
+  optimizer:
+    lr: 5e-4
+    weight_decay: 0.05
+  mixup:
+    _target_: src.datamodules.timm_mixup.TimmMixup
+    mixup_alpha: 0.8
+    cutmix_alpha: 1.0
+    label_smoothing: 0.0  # We're using label smoothing from Pytorch's CrossEntropyLoss
+
+callbacks:
+  ema: null
+  rich_progress_bar:
+    _target_: pytorch_lightning.callbacks.RichProgressBar
+

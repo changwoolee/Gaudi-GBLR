@@ -1,0 +1,32 @@
+# @package _global_
+
+# to execute this experiment run:
+# python run.py experiment=example_simple.yaml
+
+defaults:
+  - /experiment/cifar10/mixer/mixers.yaml
+  - override /model/token_mlp_cfg: fbbflylr
+  - override /model/channel_mlp_cfg: fbbflylr
+
+model:
+  drop_rate: 0.0
+  drop_path_rate: 0.0
+  channel_mlp_cfg:
+    linear1_cfg:
+      rank: 32
+      sparse_cfg: 
+        backend: "dense"
+        sparsity_config:
+          butterfly_size: 16
+          n_factors: 2
+          block: 32
+  token_mlp_cfg: #${.channel_mlp_cfg}
+    linear1_cfg:
+      rank: 32
+      sparse_cfg: 
+        backend: "dense"
+        sparsity_config:
+          butterfly_size: 8
+          n_factors: 2
+          block: 32
+

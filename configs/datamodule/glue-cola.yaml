@@ -1,0 +1,8 @@
+_target_: src.datamodules.glue.GLUEDataModule
+model_name_or_path: bert-base-uncased
+task_name: cola
+train_batch_size: 32
+eval_batch_size: 32
+max_seq_length: 128
+__train_len: 8551
+

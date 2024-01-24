@@ -1,0 +1,3 @@
+freq_sparsity:
+  _target_: src.callbacks.freq_sparsity_monitor.FreqSparsityMonitor
+  num_bins: 20

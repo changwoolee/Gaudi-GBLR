@@ -1,0 +1,9 @@
+#@package _global_
+
+defaults:
+  - /experiment/glue/glue-cola-gaudi.yaml
+  - override /datamodule: glue-wnli
+
+task:
+  task_name: wnli
+

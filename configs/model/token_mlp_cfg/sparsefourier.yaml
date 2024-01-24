@@ -1,0 +1,6 @@
+_target_: src.models.layers.mlp.MlpCustom
+linear1_cfg:
+  _target_: src.models.layers.sparse_fourier_linear.SparseFourierLinear
+  interval: 4
+linear2_cfg: ${.linear1_cfg}
+

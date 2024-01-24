@@ -1,0 +1,28 @@
+# @package _global_
+defaults:
+  - /experiment/imagenet/vit/vit-b.yaml
+
+
+callbacks:
+  init_from_pretrained:
+    _target_: src.callbacks.init_from_pretrained.InitFromPretrained
+    ckpt: ./saved_models/imagenet-vit-b/last.ckpt
+    budget: 0.2
+
+train:
+  optimizer:
+    lr: 1e-4
+  scheduler:
+    t_initial: 50
+    warmup_t: 0
+  cooldown_epochs: 0
+
+model:
+  mlp_cfg:
+    _target_: src.models.layers.mlp.MlpCustom
+    linear1_cfg:
+      _target_: src.models.layers.fastlinear.LowRank
+      rank: ${callbacks.init_from_pretrained.budget}
+    linear2_cfg: ${.linear1_cfg}
+  attnlinear_cfg: ${.mlp_cfg.linear1_cfg}
+

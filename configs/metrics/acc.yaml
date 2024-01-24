@@ -1,0 +1,4 @@
+# @package eval.metrics
+acc:
+  _target_: src.metrics.accuracy.AccuracyMine
+  task: multiclass

@@ -1,0 +1,20 @@
+# @package _global_
+
+# to execute this experiment run:
+# python run.py experiment=example_simple.yaml
+
+defaults:
+  - /experiment/cifar10/vit/vit-s.yaml
+  - override /model/vitmlp_cfg: topkmlp
+
+model:
+  drop_path_rate: 0.1
+  drop_rate: 0.0
+  mlp_cfg:
+    drop: 0.0
+    topk_ratio: 0.6
+  attnlinear_cfg:
+    _target_: src.models.layers.fastlinear.TopkLinear
+    window_size: ${model.mlp_cfg.window_size}
+    topk_ratio: ${model.mlp_cfg.topk_ratio}
+

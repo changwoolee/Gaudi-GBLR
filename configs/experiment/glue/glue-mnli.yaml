@@ -1,0 +1,8 @@
+#@package _global_
+defaults:
+  - /experiment/glue/glue-cola.yaml
+  - override /datamodule: glue-mnli
+
+task:
+  task_name: mnli
+

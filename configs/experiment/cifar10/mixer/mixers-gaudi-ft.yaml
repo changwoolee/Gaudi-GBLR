@@ -1,0 +1,29 @@
+# @package _global_
+
+# to execute this experiment run:
+# python run.py experiment=example_simple.yaml
+
+defaults:
+  - /experiment/cifar10/mixer/mixers-gaudi.yaml
+
+model:
+  channel_mlp_cfg:
+    linear1_cfg:
+      width_init: 'splr0.5'
+      adam_betas: [0.9, 0.999]
+      
+callbacks:
+  shrink:
+    start_epoch: -1
+    end_epoch: -1
+    target_width: 0.2
+  sigma_annealing:
+    sigma_init: 10.0
+
+train:
+  optimizer:
+    lr: 5e-5
+  scheduler:
+    warmup_t: 5
+    t_initial: 50
+    warmup_lr_init: 5e-6 

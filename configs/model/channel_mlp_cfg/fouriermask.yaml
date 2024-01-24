@@ -1,0 +1,9 @@
+_target_: src.models.layers.mlp.MlpCustom
+linear1_cfg:
+  _target_: src.models.layers.fouriermask.FourierMaskLR
+  rank_per_component: 32
+  num_components: 16
+  sigma: 5.0
+  min_widths: [32, 32]
+linear2_cfg: ${.linear1_cfg}
+

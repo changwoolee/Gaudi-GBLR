@@ -1,0 +1,40 @@
+#@package _global_
+#
+defaults:
+  - override /trainer: default # choose trainer from 'configs/trainer/'
+  - override /model: bert
+  - override /task: glue-model
+  - override /datamodule: glue-cola
+  - override /callbacks: default
+  - override /metrics: null  # metrics are defined in the task (src.tasks.seq.BERTModel)
+  - override /logger: wandb
+
+datamodule:
+  train_batch_size: 32
+  eval_batch_size: 32
+
+
+seed: 1111
+
+task:
+  task_name: cola
+  budget_in_ratio: 0.5
+  layer_type: null
+  decompose: false
+  load_from_decomposed: null
+
+  
+trainer:
+  accelerator: gpu
+  num_nodes: 1
+  devices: 1
+  max_epochs: 3
+
+callbacks:
+  early_stopping: null
+  model_checkpoint: 
+    monitor: null
+  save_before_fit_start:
+    _target_: src.callbacks.save_before_fit_start.SaveBeforeFitStart
+    save_dir: ${output_dir}
+
