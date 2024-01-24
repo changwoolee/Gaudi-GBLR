@@ -1,6 +1,6 @@
 # Adapted from https://github.com/rwightman/pytorch-image-models/blob/master/benchmark.py
 import torch
-from src.models.layers.fouriermask import FourierMaskLR, FourierMaskConv2d, FourierMaskConv2dIntegrated
+from src.models.layers.gblr import GaudiGBLR, GaudiGBLRConv2d, GaudiGBLRConv2dIntegrated
 
 try:
     from deepspeed.profiling.flops_profiler import get_model_profile
@@ -74,7 +74,7 @@ def profile_fvcore_sinc_gaussian(model, input_size=(3, 224, 224), input_dtype=to
 
     flops_count = 0
     for mn, m in model.named_modules():
-        if isinstance(m, FourierMaskLR):
+        if isinstance(m, GaudiGBLR):
             if m.in_features == num_features or m.out_features == num_features:
                 flop = num_tokens * m.get_num_params().item()
             elif m.in_features == num_tokens or m.out_features == num_tokens:
@@ -133,7 +133,7 @@ def profile_fvcore_gaudi_conv(model, input_size=(3, 224, 224), input_dtype=torch
 
     flops_count = 0
     for mn, m in model.named_modules():
-        if isinstance(m, (FourierMaskConv2d)):
+        if isinstance(m, (GaudiGBLRConv2d)):
             #flop = fca_dict[mn]
             #flop = flop - m.out_channels * m.in_channels ** 2 * m.kernel_size[0] * m.kernel_size[1] 
             #output_size = flop // (m.out_channels * m.in_channels * m.kernel_size[0] * m.kernel_size[1])
@@ -144,7 +144,7 @@ def profile_fvcore_gaudi_conv(model, input_size=(3, 224, 224), input_dtype=torch
             for i in range(m.num_modules):
                 flops += m.gaudi_modules[i].get_num_params()
             fca_dict[mn] = m.input_shape[0] * m.input_shape[1] * flops
-        elif isinstance(m, (FourierMaskConv2dIntegrated)):
+        elif isinstance(m, (GaudiGBLRConv2dIntegrated)):
             flops = m.gaudi_module.get_num_params()
             fca_dict[mn] = m.input_shape[0] * m.input_shape[1] * flops
 
@@ -152,7 +152,7 @@ def profile_fvcore_gaudi_conv(model, input_size=(3, 224, 224), input_dtype=torch
                 
     leaf_nodes = dict()
     for mn, m in model.named_modules():
-        if (len(list(m.children())) == 0 and not isinstance(m, FourierMaskLR)) or isinstance(m, (FourierMaskConv2d, FourierMaskConv2dIntegrated)):
+        if (len(list(m.children())) == 0 and not isinstance(m, GaudiGBLR)) or isinstance(m, (GaudiGBLRConv2d, GaudiGBLRConv2dIntegrated)):
             flops_count += fca_dict[mn]
             leaf_nodes[mn] = fca_dict[mn]
 

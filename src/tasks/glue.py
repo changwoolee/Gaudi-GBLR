@@ -16,7 +16,7 @@ from transformers import (
     AutoTokenizer,
     get_linear_schedule_with_warmup,
 )
-from src.models.layers.fouriermask import FourierMaskLR
+from src.models.layers.gblr import GaudiGBLR
 from src.models.modules.olb import find_olb
 from src.models.layers.fastlinear import LowRank
 from src.models.layers.monarch_linear import MonarchLinear, get_nblocks
@@ -148,7 +148,7 @@ class GLUETransformer(LightningModule):
                         self.hparams.gaudi_params['width_learning_rate'] = lr
                         self.hparams.gaudi_params['location_learning_rate'] = lr
                         log.info("Gaudi Structural Parameters Scaled to {:e}".format(lr))
-                    new_layer = FourierMaskLR(m.in_features, m.out_features, **self.hparams.gaudi_params).to(device)
+                    new_layer = GaudiGBLR(m.in_features, m.out_features, **self.hparams.gaudi_params).to(device)
                     if self.decompose:
                         #budget = int(6/7*budget_in_ratio * min(m.in_features, m.out_features) * (m.in_features + m.out_features))
                         if self.hparams.equal_sized:

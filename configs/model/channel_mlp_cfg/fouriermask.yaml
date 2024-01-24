@@ -1,6 +1,6 @@
 _target_: src.models.layers.mlp.MlpCustom
 linear1_cfg:
-  _target_: src.models.layers.fouriermask.FourierMaskLR
+  _target_: src.models.layers.gblr.GaudiGBLR
   rank_per_component: 32
   num_components: 16
   sigma: 5.0

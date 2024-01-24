@@ -29,3 +29,5 @@ dependencies:
     - torchmetrics==1.3.0.post0
     - transformers==4.37.0
     - wandb==0.16.2
+variables:
+  PROJECT_ROOT: $PWD

@@ -2,7 +2,7 @@ from typing import Any
 from collections import OrderedDict
 
 from lightning.pytorch import Callback, Trainer
-from src.models.layers.fouriermask import FourierMaskLR
+from src.models.layers.gblr import GaudiGBLR
 
 import torch
 import torch.nn as nn
@@ -41,7 +41,7 @@ class Softshrink(Callback):
             model = pl_module.model
             named_parameters = {}
             modules = {}
-            target_modules = (FourierMaskLR)
+            target_modules = (GaudiGBLR)
 
             lambd = self.get_lambd(self.thres, trainer, pl_module, batch_idx)
 
@@ -65,7 +65,7 @@ class TargetedSoftshrink(Softshrink):
 
     @torch.no_grad()
     def get_thres(self, thres, trainer, pl_module, batch_idx):
-        target_modules = (FourierMaskLR)
+        target_modules = (GaudiGBLR)
         width_sum = 0.
         count = 0
         if self.target_width > 0:
@@ -96,7 +96,7 @@ class TargetedSoftshrink(Softshrink):
             model = pl_module.model
             named_parameters = {}
             modules = {}
-            target_modules = (FourierMaskLR)
+            target_modules = (GaudiGBLR)
 
             lambd = self.get_lambd(self.thres, trainer, pl_module, batch_idx)
 
@@ -165,7 +165,7 @@ class MeanShrink(Callback):
             model = pl_module.model
             named_parameters = {}
             modules = {}
-            target_modules = (FourierMaskLR)
+            target_modules = (GaudiGBLR)
 
             width_sum = 0.
             count = 0

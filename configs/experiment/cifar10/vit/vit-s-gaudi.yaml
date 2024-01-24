@@ -5,7 +5,7 @@
 
 defaults:
   - /experiment/cifar10/vit/vit-s.yaml
-  - override /model/vitmlp_cfg: fouriermask
+  - override /model/vitmlp_cfg: gblr
 
 model:
   drop_path_rate: 0.1

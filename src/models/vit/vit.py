@@ -21,7 +21,7 @@ from src.models.modules.vision_common import Block
 from src.models.layers.fastlinear import LowRank, SparseLRLinear
 from src.models.layers.blocksparse_linear import BlockSparseLinear
 from src.models.layers.blockdiag_linear import BlockdiagLinear
-from src.models.layers.fouriermask import FourierMaskLR
+from src.models.layers.gblr import GaudiGBLR
 
 
 _logger = logging.getLogger(__name__)
@@ -282,7 +282,7 @@ def _init_vit_weights(m, n: str = '', head_bias: float = 0., jax_impl: bool = Fa
       as my original init for compatibility with prev hparam / downstream use cases (ie DeiT).
     * When called w/ valid n (module name) and jax_impl=True, will (hopefully) match JAX impl
     """
-    if isinstance(m, (nn.Linear, BlockSparseLinear, BlockdiagLinear, LowRank, SparseLRLinear, FourierMaskLR)):
+    if isinstance(m, (nn.Linear, BlockSparseLinear, BlockdiagLinear, LowRank, SparseLRLinear, GaudiGBLR)):
         if n.startswith('head'):
             nn.init.zeros_(m.weight)
             nn.init.constant_(m.bias, head_bias)
@@ -303,7 +303,7 @@ def _init_vit_weights(m, n: str = '', head_bias: float = 0., jax_impl: bool = Fa
                 dense_init_fn_ = partial(trunc_normal_, std=.02)
                 if isinstance(m, nn.Linear):
                     dense_init_fn_(m.weight)
-                elif isinstance(m, (BlockSparseLinear, BlockdiagLinear, LowRank, FourierMaskLR)):
+                elif isinstance(m, (BlockSparseLinear, BlockdiagLinear, LowRank, GaudiGBLR)):
                     m.set_weights_from_dense_init(dense_init_fn_)
     elif jax_impl and isinstance(m, nn.Conv2d):
         # NOTE conv was left to pytorch default in my original init

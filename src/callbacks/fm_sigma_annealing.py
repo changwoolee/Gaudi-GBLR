@@ -6,7 +6,7 @@ from lightning.pytorch.utilities import rank_zero_only
 
 import torch
 import torch.nn as nn
-from src.models.layers.fouriermask import FourierMaskLR
+from src.models.layers.gblr import GaudiGBLR
 
 
 
@@ -43,7 +43,7 @@ class SigmaAnnealing(Callback):
         #pl_module.log("sigma", sigma, prog_bar=True, rank_zero_only=True, logger=True)
 
         for mn, m in model.named_modules():
-            if isinstance(m, FourierMaskLR):
+            if isinstance(m, GaudiGBLR):
                 if isinstance(m.sigma, torch.Tensor):
                     m.sigma.data = torch.ones_like(m.sigma) * sigma
                 else:
@@ -55,7 +55,7 @@ class SigmaAnnealing(Callback):
             return
         model = pl_module.model
         for mn, m in model.named_modules():
-            if isinstance(m, FourierMaskLR):
+            if isinstance(m, GaudiGBLR):
                 if isinstance(m.sigma, torch.Tensor):
                     m.sigma.data = sigma
                 else:
@@ -94,7 +94,7 @@ class SigmaAnnealingBatch(Callback):
         pl_module.log("sigma", sigma, prog_bar=True, rank_zero_only=True, logger=True)
 
         for mn, m in model.named_modules():
-            if isinstance(m, FourierMaskLR):
+            if isinstance(m, GaudiGBLR):
                 if isinstance(m.sigma, torch.Tensor):
                     m.sigma.data = torch.ones_like(m.sigma) * sigma
                 else:

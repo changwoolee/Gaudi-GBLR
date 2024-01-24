@@ -18,7 +18,7 @@ except ModuleNotFoundError:
 from einops import rearrange
 
 
-class FourierMaskConv2d(nn.Module):
+class GaudiGBLRConv2d(nn.Module):
     def __init__(self, conv2d_layer, gaudi_params, unified_mask=False, init='lr'): #in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, 
                  #groups=1, bias=True, padding_mode='zeros', device=None, dtype=None,
                  #gaudi_params=None):
@@ -40,7 +40,7 @@ class FourierMaskConv2d(nn.Module):
         module_list = []
         self.num_modules = self.kernel_size[0] * self.kernel_size[1]
         for i in range(self.num_modules):
-            m = FourierMaskLR(in_features=conv2d_layer.in_channels, out_features=conv2d_layer.out_channels,
+            m = GaudiGBLR(in_features=conv2d_layer.in_channels, out_features=conv2d_layer.out_channels,
                                          **gaudi_params)
             M = conv2d_layer.weight[:,:,i//self.kernel_size[1], i%self.kernel_size[1]]
             if init == 'lr':
@@ -92,7 +92,7 @@ class FourierMaskConv2d(nn.Module):
 
 
 
-class FourierMaskConv2dIntegrated(nn.Module):
+class GaudiGBLRConv2dIntegrated(nn.Module):
     def __init__(self, conv2d_layer, gaudi_params, unified_mask=False, init='lr'): 
         super().__init__()
 
@@ -109,7 +109,7 @@ class FourierMaskConv2dIntegrated(nn.Module):
 
         gaudi_params['bias'] = False
         self.kernel_size = conv2d_layer.kernel_size
-        m = FourierMaskLR(in_features=conv2d_layer.in_channels * self.kernel_size[0]* self.kernel_size[1], 
+        m = GaudiGBLR(in_features=conv2d_layer.in_channels * self.kernel_size[0]* self.kernel_size[1], 
                           out_features=conv2d_layer.out_channels,
                           **gaudi_params)
         M = rearrange(conv2d_layer.weight, 'oc ic k1 k2 -> oc (k1 k2 ic)')
@@ -152,7 +152,7 @@ class FourierMaskConv2dIntegrated(nn.Module):
 
 
 
-class FourierMaskLR(nn.Module):
+class GaudiGBLR(nn.Module):
     __constants__ = ['in_features', 'out_features']
     in_features: int
     out_features: int
@@ -567,7 +567,7 @@ def test():
     num_components = in_features // rank_per_component
 
 
-    m = FourierMaskLR(in_features, out_features, rank_per_component, num_components)
+    m = GaudiGBLR(in_features, out_features, rank_per_component, num_components)
 
     x = torch.randn(3,4,512)
     y = m(x)

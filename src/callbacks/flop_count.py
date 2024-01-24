@@ -9,7 +9,7 @@ from lightning.pytorch.utilities.parsing import AttributeDict
 from src.utils.flops import has_deepspeed_profiling, has_fvcore_profiling
 from src.utils.flops import profile_deepspeed, profile_fvcore, profile_fvcore_sinc_gaussian, profile_fvcore_gaudi_conv
 
-from src.models.layers.fouriermask import FourierMaskLR, FourierMaskConv2d
+from src.models.layers.gblr import GaudiGBLR, GaudiGBLRConv2d
 from src.utils import utils
 log = utils.get_logger(__name__)
 
@@ -26,7 +26,7 @@ class NumParamsGPT2Gaudi(Callback):
         counts = 0
         with torch.no_grad():
             for mn, m in pl_module.model.named_modules():
-                if isinstance(m, FourierMaskLR):
+                if isinstance(m, GaudiGBLR):
                     num_params = int(m.get_num_params())
                     counts += num_params * 1024  
 
@@ -48,7 +48,7 @@ class NumParamsGPT2MediumGaudi(Callback):
         counts = 0
         with torch.no_grad():
             for mn, m in pl_module.model.named_modules():
-                if isinstance(m, FourierMaskLR):
+                if isinstance(m, GaudiGBLR):
                     num_params = int(m.get_num_params())
                     counts += num_params * 1024  
 

@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions.beta import Beta
 
-from src.models.layers.fouriermask import FourierMaskLR, FourierMaskHard
+from src.models.layers.gblr import GaudiGBLR, GaudiHard
 
 from einops import rearrange
 
@@ -24,7 +24,7 @@ class MatLoss(nn.Module):
 
         count = 0
         for mn, m in pl_module.model.named_modules():
-            if isinstance(m, FourierMaskLR):
+            if isinstance(m, GaudiGBLR):
                 masked_w1 = rearrange(m.lr_weight1.detach() * m.buffer['m1'], 'nc rpc in_f -> (nc rpc) in_f')
                 masked_w2 = rearrange(m.lr_weight2.detach() * m.buffer['m2'], 'nc out_f rpc -> out_f (nc rpc)')
 
@@ -67,7 +67,7 @@ class BetaRegularizer(nn.Module):
     def forward(self, model):
         loss = 0.
         for mn, m in model.named_modules():
-            if isinstance(m, FourierMaskLR):
+            if isinstance(m, GaudiGBLR):
                 #loss += self.dist.log_prob(p)
                 w1, w2 = m.get_width(0), m.get_width(1)
                 p = torch.stack([w1, w2])
@@ -89,7 +89,7 @@ class AverageRegularizer(nn.Module):
         widths = 0.
         #mat_loss = 0.
         for mn, m in model.named_modules():
-            if isinstance(m, FourierMaskLR) and not isinstance(m, FourierMaskHard):
+            if isinstance(m, GaudiGBLR) and not isinstance(m, GaudiHard):
                 if self.exclude_qkv and 'attn' in mn:
                     continue
                 w1, w2 = m.get_width(0), m.get_width(1)
@@ -108,7 +108,7 @@ class AreaRegularizer(AverageRegularizer):
         areas = 0.
         module_count = 0
         for mn, m in model.named_modules():
-            if isinstance(m, FourierMaskLR):
+            if isinstance(m, GaudiGBLR):
                 w1, w2 = m.get_width(0), m.get_width(1)
                 #w1 -= m.min_widths[0]
                 #w2 -= m.min_widths[1]

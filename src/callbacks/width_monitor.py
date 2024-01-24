@@ -9,7 +9,7 @@ from collections import OrderedDict
 from lightning.pytorch import Callback, Trainer
 from lightning.pytorch.utilities import rank_zero_only
 from lightning.pytorch.utilities.model_summary import get_human_readable_count
-from src.models.layers.fouriermask import FourierMaskLR
+from src.models.layers.gblr import GaudiGBLR
 
 import torch
 import torch.nn as nn
@@ -31,7 +31,7 @@ class WidthMonitor(Callback):
         model = pl_module.model
         named_parameters = {}
         modules = {}
-        ln_modules = (FourierMaskLR,)
+        ln_modules = (GaudiGBLR,)
         for mn, m in model.named_modules():
             if isinstance(m, ln_modules):
                 min_widths = m.min_widths

@@ -214,7 +214,7 @@ class GPT2Wiki103(SequenceLMModel):
 
         from copy import deepcopy
         from transformers.modeling_utils import Conv1D
-        from src.models.layers.fouriermask import FourierMaskLR
+        from src.models.layers.gblr import GaudiGBLR
         from src.models.modules.olb import find_olb
         from src.models.layers.fastlinear import LowRank
         from src.models.layers.monarch_linear import MonarchLinear
@@ -264,7 +264,7 @@ class GPT2Wiki103(SequenceLMModel):
                 elif self.model_cfg.layer_type == 'gaudi':
                     #if self.model_cfg.project_only:
                     #    self.model_cfg.gaudi_params['width_init'] = 'lr0.25' 
-                    new_layer = FourierMaskLR(in_features, out_features, **self.model_cfg.gaudi_params).to(device)
+                    new_layer = GaudiGBLR(in_features, out_features, **self.model_cfg.gaudi_params).to(device)
                     if self.model_cfg.decompose:
                         if self.model_cfg.project_only:
                             new_layer.set_weights_from_projection(M)
@@ -337,7 +337,7 @@ class ConvNetImageNet(SequenceModel):
             return
 
         from copy import deepcopy
-        from src.models.layers.fouriermask import FourierMaskLR, FourierMaskConv2d, FourierMaskConv2dIntegrated
+        from src.models.layers.gblr import GaudiGBLR, GaudiGBLRConv2d, GaudiGBLRConv2dIntegrated
 
         new_model = deepcopy(self.model)
         for mn, m in self.model.named_modules():
@@ -357,9 +357,9 @@ class ConvNetImageNet(SequenceModel):
                                
                 if self.model_cfg.layer_type == 'gaudi':
                     if self.model_cfg.per_kernel:
-                        new_layer = FourierMaskConv2d(m, gaudi_params=self.model_cfg.gaudi_params, init=self.model_cfg.init).to(device)
+                        new_layer = GaudiGBLRConv2d(m, gaudi_params=self.model_cfg.gaudi_params, init=self.model_cfg.init).to(device)
                     else:
-                        new_layer = FourierMaskConv2dIntegrated(m, gaudi_params=self.model_cfg.gaudi_params, init=self.model_cfg.init).to(device)
+                        new_layer = GaudiGBLRConv2dIntegrated(m, gaudi_params=self.model_cfg.gaudi_params, init=self.model_cfg.init).to(device)
                 
 
                 elif self.model_cfg.layer_type == 'None':

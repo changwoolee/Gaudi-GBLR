@@ -5,7 +5,7 @@
 
 defaults:
   - /experiment/cifar10/mixer/mixers.yaml
-  - override /model/channel_mlp_cfg: fouriermask
+  - override /model/channel_mlp_cfg: gblr
 
 model:
   drop_path_rate: 0.1

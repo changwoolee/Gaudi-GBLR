@@ -11,7 +11,7 @@ import torch.nn.functional as F
 from einops import rearrange
 
 from src.models.modules.olb import find_olb
-from src.models.layers.fouriermask import FourierMaskLR
+from src.models.layers.gblr import GaudiGBLR
 from src.models.layers.fastlinear import LowRank
 from src.models.layers.monarch_linear import MonarchLinear, get_nblocks
 from src.models.layers.fastlinear import SparseLRLinear
@@ -87,7 +87,7 @@ class ReplaceBertLayers(Callback):
                         new_layer.bias.data = m.bias.data
 
                 elif self.layer_type == 'gaudi':
-                    new_layer = FourierMaskLR(m.in_features, m.out_features, **self.gaudi_params).to(device)
+                    new_layer = GaudiGBLR(m.in_features, m.out_features, **self.gaudi_params).to(device)
                     if self.decompose:
                         budget = int(6/7*budget_in_ratio * min(m.in_features, m.out_features) * (m.in_features + m.out_features))
                         M = M.cuda()
@@ -279,7 +279,7 @@ class InitFromPretrained(Callback):
                             pm.add_module(child_name, deepcopy(m))
 
 
-            elif isinstance(m, FourierMaskLR):
+            elif isinstance(m, GaudiGBLR):
                 log.info(mn) 
                 if self.ckpt is None:
                     with torch.no_grad():

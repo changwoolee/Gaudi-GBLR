@@ -58,7 +58,7 @@ import hydra
 from src.models.layers.fastlinear import LowRank, SparseLRLinear
 from src.models.layers.blocksparse_linear import BlockSparseLinear
 from src.models.layers.blockdiag_linear import BlockdiagLinear
-from src.models.layers.fouriermask import FourierMaskLR
+from src.models.layers.gblr import GaudiGBLR
 
 
 def _cfg(url='', **kwargs):
@@ -338,7 +338,7 @@ class MlpMixer(nn.Module):
 def _init_weights(module: nn.Module, name: str, head_bias: float = 0., flax=False):
     """ Mixer weight initialization (trying to match Flax defaults)
     """
-    if isinstance(module, (nn.Linear, BlockSparseLinear, BlockdiagLinear, LowRank, SparseLRLinear, FourierMaskLR)):
+    if isinstance(module, (nn.Linear, BlockSparseLinear, BlockdiagLinear, LowRank, SparseLRLinear, GaudiGBLR)):
         if name.startswith('head') and isinstance(module, nn.Linear):
             nn.init.zeros_(module.weight)
             #nn.init.trunc_normal_(module.weight, std=0.02)#*math.sqrt(module.weight.size(0)))
@@ -361,7 +361,7 @@ def _init_weights(module: nn.Module, name: str, head_bias: float = 0., flax=Fals
                 dense_init_fn_ = nn.init.xavier_uniform_
                 if isinstance(module, nn.Linear):
                     dense_init_fn_(module.weight)
-                elif isinstance(module, (BlockSparseLinear, BlockdiagLinear, LowRank, FourierMaskLR)):
+                elif isinstance(module, (BlockSparseLinear, BlockdiagLinear, LowRank, GaudiGBLR)):
                     module.set_weights_from_dense_init(dense_init_fn_)
     elif isinstance(module, nn.Conv2d):
         lecun_normal_(module.weight)

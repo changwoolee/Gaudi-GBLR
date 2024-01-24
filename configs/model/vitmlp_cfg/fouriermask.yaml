@@ -2,7 +2,7 @@
 mlp_cfg:
   _target_: src.models.layers.mlp.MlpCustom
   linear1_cfg:
-    _target_: src.models.layers.fouriermask.FourierMaskLR
+    _target_: src.models.layers.gblr.GaudiGBLR
     sigma: 10.0
     min_widths: [0.0, 0.0]
     max_widths: [1.0, 1.0]
