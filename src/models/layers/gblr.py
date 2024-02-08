@@ -19,9 +19,7 @@ from einops import rearrange
 
 
 class GaudiGBLRConv2d(nn.Module):
-    def __init__(self, conv2d_layer, gaudi_params, unified_mask=False, init='lr'): #in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, 
-                 #groups=1, bias=True, padding_mode='zeros', device=None, dtype=None,
-                 #gaudi_params=None):
+    def __init__(self, conv2d_layer, gaudi_params, unified_mask=False, init='lr'):
         super().__init__()
 
         self.unified_mask = unified_mask
@@ -67,13 +65,6 @@ class GaudiGBLRConv2d(nn.Module):
 
 
 
-    #def set_weights_from_projection(self, w):
-    #    w_shape = w.shape
-    #    #w = rearrange(w, 'out_c in_c k1 k2 -> out_c (in_c k1 k2)')
-    #    w = rearrange(w, 'out_c in_c k1 k2 -> out_c (k1 k2 in_c)')
-    #    self.gaudi_module.set_weights_from_projection(w)
-
-
     def forward(self, x):
         self.input_shape = x.shape[2:]
         weight_list = []
@@ -83,10 +74,6 @@ class GaudiGBLRConv2d(nn.Module):
             w = self.gaudi_modules[i].get_masked_matrix(mask1, mask2)
             weight_list.append(w)
         weight = rearrange(weight_list, '(k1 k2) oc ic -> oc ic k1 k2', k1=self.kernel_size[0], k2=self.kernel_size[1])
-        #x = self.conv2d_layer(x)
-        #w = self.gaudi_module.get_masked_matrix()
-        #w = rearrange(w, 'out_c (k1 k2 in_c) -> out_c in_c k1 k2', k1=self.kernel_size[0], k2=self.kernel_size[1], out_c=self.out_channels, in_c=self.in_channels)
-        #w = w.view(x.size(1), x.size(1), 1, 1)
         x = F.conv2d(x, weight, self.bias, padding=self.padding, stride=self.stride, groups=self.groups, dilation=self.dilation)
         return x
 
@@ -351,7 +338,6 @@ class GaudiGBLR(nn.Module):
                 with torch.no_grad():
                     nonzeros = torch.ones_like(self.widths[:, :num_nonzero_comp])
                     zeros = torch.zeros_like(self.widths[:, num_nonzero_comp:])
-                    #zeros[0,:]=1/self.in_features
                     zeros[0,::2]=1/self.in_features
                     zeros[1,1::2] = 1 / self.out_features
                     self.widths.data = torch.cat([nonzeros, zeros], dim=1)
@@ -396,8 +382,8 @@ class GaudiGBLR(nn.Module):
             else:
                 n = self.out_features
             w_quantized = torch.round((w*n)) / n
-            w_ste = w - w.detach() + w_quantized
-        return w_ste 
+            w = w - w.detach() + w_quantized
+        return w 
 
     def get_nonzero_width_mask(self, width1=None, width2=None):
         if width1 is None:
@@ -536,19 +522,12 @@ class GaudiGBLR(nn.Module):
 
         if self.compute_mode == "lr":
 
-            #m1 = self.get_mask_by_ind(0)
-            #m2 = self.get_mask_by_ind(1)
-            #w1 = rearrange(self.lr_weight1 * m1, 'nc rpc in_f -> (nc rpc) in_f')
-            #w2 = rearrange(self.lr_weight2 * m2, 'nc out_f rpc -> out_f (nc rpc)')
-            w1 = self.lr_weight1
-            w2 = self.lr_weight2
+            m1 = self.get_mask_by_ind(0)
+            m2 = self.get_mask_by_ind(1)
+            w1 = rearrange(self.lr_weight1 * m1, 'nc rpc in_f -> (nc rpc) in_f')
+            w2 = rearrange(self.lr_weight2 * m2, 'nc out_f rpc -> out_f (nc rpc)')
             out = F.linear(F.linear(input, w1), w2, self.bias)
 
-            #out = out[:,:,:self.out_features]
-
-            #if self.bias is not None:
-            #    out += self.bias.to(dtype=out.dtype)
-            
         elif self.compute_mode=='dense':
             if hasattr(self, 'weight'):
                 out = F.linear(input, self.weight, self.bias.to(dtype=input.dtype)) 
