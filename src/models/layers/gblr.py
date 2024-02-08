@@ -416,25 +416,6 @@ class GaudiGBLR(nn.Module):
             return flops
 
 
-    def resize_model(self):
-        with torch.no_grad():
-            w1 = self.get_width(0)
-            w2 = self.get_width(1)
-            m = self.get_nonzero_width_mask(w1, w2)
-            self.num_components = torch.sum(m).int().item()
-            m = m > 0
-            new_width = self.widths[:,m].clone().detach()
-            new_loc = self.locations[:,m].clone().detach()
-            new_lr_weight1 = self.lr_weight1[m,:,:].clone().detach()
-            new_lr_weight2 = self.lr_weight2[m,:,:].clone().detach()
-            self.widths.data = new_width
-            self.locations.data = new_loc
-            self.lr_weight1.data = new_lr_weight1.squeeze()
-            self.lr_weight2.data = new_lr_weight2.squeeze().T
-            
-            
-
-
     def get_mask(self, w, loc, freq, sigma, n):
         # Inputs
         #   w: (num_components,) 
