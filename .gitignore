@@ -17,6 +17,7 @@ ngc_setup.sh
 vit-pytorch/
 run.log
 *.swp
+config_tree*
 notebooks/.ipynb_checkpoints/
 # Created by https://www.gitignore.io/api/python
 # Edit at https://www.gitignore.io/?templates=python

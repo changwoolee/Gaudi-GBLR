@@ -56,12 +56,3 @@ callbacks:
     mode: min
 
 
-
-hydra:
-  run:
-    dir: /nfs/turbo/coe-hunseok/cwoolee/gaudi/${task_name}/runs/${now:%Y-%m-%d}_${now:%H-%M-%S}
-  sweep:
-    dir: /nfs/turbo/coe-hunseok//cwoolee/gaudi/${task_name}/multiruns/${now:%Y-%m-%d}_${now:%H-%M-%S}
-    subdir: ${hydra.job.num}
-
-
